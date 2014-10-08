@@ -287,7 +287,96 @@ describe AutoStripAttributes do
       # returning to original state
       AutoStripAttributes::Config.setup :clear => true
     end
+  end
 
+  describe "Multible attributes with true if option" do
+    class MockRecordWithMultipleAttributesWithTrueIf < MockRecordParent #< ActiveRecord::Base
+      #column :foo, :string
+      #column :bar, :string
+      #column :biz, :string
+      #column :bang, :integer
+      attr_accessor :foo, :bar, :biz, :bang
+      auto_strip_attributes :foo, :bar, :biz, :bang, :if => true
+    end
+    it "should not strip if false" do
+      @record = MockRecordWithMultipleAttributesWithTrueIf.new
+      @record.foo = "  foo\tfoo"
+      @record.bar = "  "
+      @record.biz = "foo  "
+      @record.valid?
+      @record.foo.must_equal "foo\tfoo"
+      @record.bar.must_be_nil
+      @record.biz.must_equal "foo"
+    end
+  end
+
+  describe "Multible attributes with true if option method" do
+    class MockRecordWithMultipleAttributesWithTrueIfMethod < MockRecordParent #< ActiveRecord::Base
+      #column :foo, :string
+      #column :bar, :string
+      #column :biz, :string
+      #column :bang, :integer
+      attr_accessor :foo, :bar, :biz, :bang
+      auto_strip_attributes :foo, :bar, :biz, :bang, :if => :strip?
+      def strip?
+        true
+      end
+    end
+    it "should not strip if false" do
+      @record = MockRecordWithMultipleAttributesWithTrueIfMethod.new
+      @record.foo = "  foo\tfoo"
+      @record.bar = "  "
+      @record.biz = "foo  "
+      @record.valid?
+      @record.foo.must_equal "foo\tfoo"
+      @record.bar.must_be_nil
+      @record.biz.must_equal "foo"
+    end
+  end
+
+  describe "Multible attributes with false if option" do
+    class MockRecordWithMultipleAttributesWithFalseIf < MockRecordParent #< ActiveRecord::Base
+      #column :foo, :string
+      #column :bar, :string
+      #column :biz, :string
+      #column :bang, :integer
+      attr_accessor :foo, :bar, :biz, :bang
+      auto_strip_attributes :foo, :bar, :biz, :bang, :if => false
+    end
+    it "should not strip if false" do
+      @record = MockRecordWithMultipleAttributesWithFalseIf.new
+      @record.foo = "  foo\tfoo"
+      @record.bar = "  "
+      @record.biz = "foo  "
+      @record.valid?
+      @record.foo.must_equal "  foo\tfoo"
+      @record.bar.must_equal "  "
+      @record.biz.must_equal "foo  "
+    end
+  end
+
+  describe "Multible attributes with false if option method" do
+    class MockRecordWithMultipleAttributesWithFalseIfMethod < MockRecordParent #< ActiveRecord::Base
+      #column :foo, :string
+      #column :bar, :string
+      #column :biz, :string
+      #column :bang, :integer
+      attr_accessor :foo, :bar, :biz, :bang
+      auto_strip_attributes :foo, :bar, :biz, :bang, :if => :strip?
+      def strip?
+        false
+      end
+    end
+    it "should not strip if false" do
+      @record = MockRecordWithMultipleAttributesWithFalseIfMethod.new
+      @record.foo = "  foo\tfoo"
+      @record.bar = "  "
+      @record.biz = "foo  "
+      @record.valid?
+      @record.foo.must_equal "  foo\tfoo"
+      @record.bar.must_equal "  "
+      @record.biz.must_equal "foo  "
+    end
   end
 
   describe "complex usecase with custom config" do

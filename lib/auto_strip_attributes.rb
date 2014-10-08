@@ -9,12 +9,16 @@ module AutoStripAttributes
 
     attributes.each do |attribute|
       before_validation do |record|
-        #debugger
-        value = record[attribute]
-        AutoStripAttributes::Config.filters_order.each do |filter_name|
-          next unless options[filter_name]
-          value = AutoStripAttributes::Config.filters[filter_name].call value
-          record[attribute] = value
+        options[:if] = options[:if].nil? ? true : options[:if]
+        options[:if] = options[:if] == true || options[:if] == false ? options[:if] : record.public_send(options[:if])
+        if options[:if]
+          #debugger
+          value = record[attribute]
+          AutoStripAttributes::Config.filters_order.each do |filter_name|
+            next unless options[filter_name]
+            value = AutoStripAttributes::Config.filters[filter_name].call value
+            record[attribute] = value
+          end
         end
       end
     end
